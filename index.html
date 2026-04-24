@@ -91,7 +91,7 @@
             </div>
         </div>
         
-        <div class="flex items-center gap-2 md:gap-4">
+        <div class="flex items-center gap-2 md:gap-4 flex-wrap justify-end">
             <div class="flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/50 shadow-inner">
                 <button id="btnMode2D" class="flex items-center gap-2 px-3 py-1.5 text-xs md:text-sm font-semibold rounded-lg transition-all bg-cyan-500/20 text-cyan-400 shadow-sm">
                     <i data-lucide="pen-tool" class="w-4 h-4"></i><span class="hidden sm:inline">2D</span>
@@ -172,6 +172,7 @@
                 <span class="font-bold tracking-widest uppercase text-[10px] text-slate-400">3D Interaction Controls</span>
                 <span class="flex items-center gap-2"><i data-lucide="mouse-pointer-2" class="w-3 h-3 text-white"></i> Click objects to select</span>
                 <span class="flex items-center gap-2"><i data-lucide="move" class="w-3 h-3"></i> Switch Move/Rotate at bottom</span>
+                <span class="flex items-center gap-2"><i data-lucide="trash-2" class="w-3 h-3 text-rose-400"></i> Press Delete key to remove</span>
                 <span class="flex items-center gap-2"><i data-lucide="rotate-cw" class="w-3 h-3"></i> Drag background to Rotate Camera</span>
                 <span class="flex items-center gap-2"><i data-lucide="maximize" class="w-3 h-3"></i> Scroll to Zoom</span>
             </div>
@@ -183,6 +184,10 @@
                 </button>
                 <button id="btn3dRotate" class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors">
                     <i data-lucide="rotate-3d" class="w-4 h-4"></i> Rotate
+                </button>
+                <div class="w-px bg-slate-700 mx-1 my-1"></div>
+                <button id="btn3dDelete" class="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg text-rose-400 hover:text-white hover:bg-rose-500 transition-colors opacity-50 cursor-not-allowed" disabled>
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Delete
                 </button>
             </div>
 
@@ -357,11 +362,17 @@
         const TOOL_CATEGORIES = [
             { name: 'Architecture', items: [
                 { id: 'room', name: 'Floor / Room', icon: 'square', defaultWidth: 200, defaultHeight: 200, color: '#f1f5f9', opacity: 0.5, layer: 0 },
+                { id: 'house', name: 'House', icon: 'home', defaultWidth: 300, defaultHeight: 300, color: '#f1f5f9', opacity: 1, layer: 2 },
+                { id: 'dome', name: 'Dome', icon: 'circle-dashed', defaultWidth: 200, defaultHeight: 200, color: '#e2e8f0', opacity: 1, layer: 2 },
                 { id: 'wall', name: 'Wall', icon: 'rectangle-horizontal', defaultWidth: 150, defaultHeight: 10, color: '#1e293b', opacity: 1, layer: 3 },
                 { id: 'door', name: 'Door', icon: 'door-open', defaultWidth: 40, defaultHeight: 10, color: '#8b5cf6', opacity: 1, layer: 3 },
                 { id: 'window', name: 'Window', icon: 'app-window', defaultWidth: 60, defaultHeight: 10, color: '#0ea5e9', opacity: 1, layer: 3 },
                 { id: 'stairs', name: 'Stairs', icon: 'align-end-vertical', defaultWidth: 60, defaultHeight: 120, color: '#64748b', opacity: 1, layer: 1 },
                 { id: 'column', name: 'Column', icon: 'box', defaultWidth: 20, defaultHeight: 20, color: '#cbd5e1', opacity: 1, layer: 3 },
+            ]},
+            { name: 'Storage', items: [
+                { id: 'wardrobe', name: 'Wardrobe', icon: 'columns', defaultWidth: 100, defaultHeight: 60, color: '#475569', opacity: 1, layer: 2 },
+                { id: 'bookshelf', name: 'Bookshelf', icon: 'library', defaultWidth: 80, defaultHeight: 30, color: '#78350f', opacity: 1, layer: 2 },
             ]},
             { name: 'Living & Bedroom', items: [
                 { id: 'bed', name: 'Bed', icon: 'bed-double', defaultWidth: 70, defaultHeight: 90, color: '#6366f1', opacity: 1, layer: 2 },
@@ -369,19 +380,24 @@
                 { id: 'tv', name: 'Television', icon: 'tv', defaultWidth: 60, defaultHeight: 15, color: '#0f172a', opacity: 1, layer: 2 },
                 { id: 'rug', name: 'Area Rug', icon: 'grid-3x3', defaultWidth: 120, defaultHeight: 150, color: '#fca5a5', opacity: 1, layer: 1 },
             ]},
+            { name: 'Kitchen & Bath', items: [
+                { id: 'fridge', name: 'Fridge', icon: 'refrigerator', defaultWidth: 40, defaultHeight: 40, color: '#e2e8f0', opacity: 1, layer: 2 },
+                { id: 'stove', name: 'Stove', icon: 'flame', defaultWidth: 40, defaultHeight: 40, color: '#334155', opacity: 1, layer: 2 },
+                { id: 'sink', name: 'Sink', icon: 'droplet', defaultWidth: 30, defaultHeight: 20, color: '#cbd5e1', opacity: 1, layer: 2 },
+                { id: 'toilet', name: 'Toilet', icon: 'circle', defaultWidth: 30, defaultHeight: 40, color: '#f8fafc', opacity: 1, layer: 2 },
+                { id: 'bathtub', name: 'Bathtub', icon: 'bath', defaultWidth: 70, defaultHeight: 150, color: '#f1f5f9', opacity: 1, layer: 2 },
+                { id: 'shower', name: 'Shower', icon: 'shower-head', defaultWidth: 90, defaultHeight: 90, color: '#94a3b8', opacity: 1, layer: 2 },
+            ]},
             { name: 'Office & Dining', items: [
                 { id: 'desk', name: 'Desk', icon: 'monitor', defaultWidth: 60, defaultHeight: 40, color: '#475569', opacity: 1, layer: 2 },
                 { id: 'laptop', name: 'Laptop', icon: 'laptop', defaultWidth: 15, defaultHeight: 10, color: '#94a3b8', opacity: 1, layer: 3 },
                 { id: 'table', name: 'Dining Table', icon: 'table', defaultWidth: 80, defaultHeight: 80, color: '#92400e', opacity: 1, layer: 2 },
             ]},
-            { name: 'Kitchen & Bath', items: [
-                { id: 'fridge', name: 'Fridge', icon: 'refrigerator', defaultWidth: 40, defaultHeight: 40, color: '#e2e8f0', opacity: 1, layer: 2 },
-                { id: 'stove', name: 'Stove', icon: 'flame', defaultWidth: 40, defaultHeight: 40, color: '#334155', opacity: 1, layer: 2 },
-                { id: 'sink', name: 'Sink', icon: 'droplet', defaultWidth: 30, defaultHeight: 20, color: '#cbd5e1', opacity: 1, layer: 2 },
-                { id: 'toilet', name: 'Toilet / Bath', icon: 'bath', defaultWidth: 30, defaultHeight: 40, color: '#f8fafc', opacity: 1, layer: 2 },
-            ]},
-            { name: 'Decor', items: [
+            { name: 'Outdoor & Extras', items: [
                 { id: 'plant', name: 'Potted Plant', icon: 'trees', defaultWidth: 30, defaultHeight: 30, color: '#22c55e', opacity: 1, layer: 2 },
+                { id: 'lake', name: 'Lake', icon: 'droplets', defaultWidth: 400, defaultHeight: 400, color: '#38bdf8', opacity: 0.8, layer: 1 },
+                { id: 'pool', name: 'Pool', icon: 'waves', defaultWidth: 300, defaultHeight: 200, color: '#38bdf8', opacity: 0.9, layer: 1 },
+                { id: 'car', name: 'Car', icon: 'car', defaultWidth: 180, defaultHeight: 80, color: '#ef4444', opacity: 1, layer: 2 },
             ]}
         ];
 
@@ -406,7 +422,7 @@
         let selectedId = null;
         let isDragging = false;
         let dragOffset = { x: 0, y: 0 };
-        let viewMode = '2d'; // '2d' or '3d'
+        let viewMode = '2d'; // '2d', '3d', or 'paint'
         
         let engine3D = null;
         let domNodes2D = {};
@@ -457,25 +473,22 @@
             document.getElementById('btnMode3D').className = `flex items-center gap-2 px-3 py-1.5 text-xs md:text-sm font-semibold rounded-lg transition-all ${viewMode === '3d' ? 'bg-indigo-500/20 text-indigo-400 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`;
             document.getElementById('btnModePaint').className = `flex items-center gap-2 px-3 py-1.5 text-xs md:text-sm font-semibold rounded-lg transition-all ${viewMode === 'paint' ? 'bg-purple-500/20 text-purple-400 shadow-sm' : 'text-slate-400 hover:text-slate-200'}`;
 
-            // Views & Sidebars
+            // Views & Sidebars Visibility
+            view2d.classList.add('hidden-el');
+            view3d.classList.add('hidden-el');
+            viewPaint.classList.add('hidden-el');
+            document.getElementById('sidebarArch').classList.add('hidden-el');
+            document.getElementById('sidebarPaint').classList.add('hidden-el');
+
             if (viewMode === '3d') {
-                view2d.classList.add('hidden-el');
                 view3d.classList.remove('hidden-el');
-                viewPaint.classList.add('hidden-el');
                 document.getElementById('sidebarArch').classList.remove('hidden-el');
-                document.getElementById('sidebarPaint').classList.add('hidden-el');
             } else if (viewMode === 'paint') {
-                view2d.classList.add('hidden-el');
-                view3d.classList.add('hidden-el');
                 viewPaint.classList.remove('hidden-el');
-                document.getElementById('sidebarArch').classList.add('hidden-el');
                 document.getElementById('sidebarPaint').classList.remove('hidden-el');
             } else {
                 view2d.classList.remove('hidden-el');
-                view3d.classList.add('hidden-el');
-                viewPaint.classList.add('hidden-el');
                 document.getElementById('sidebarArch').classList.remove('hidden-el');
-                document.getElementById('sidebarPaint').classList.add('hidden-el');
             }
 
             // Grid Pan
@@ -503,6 +516,18 @@
             } else {
                 propertiesPanel.classList.add('hidden-el');
             }
+
+            // 3D Delete Button State
+            const btn3dDel = document.getElementById('btn3dDelete');
+            if (btn3dDel) {
+                if (selectedId && viewMode === '3d') {
+                    btn3dDel.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn3dDel.disabled = false;
+                } else {
+                    btn3dDel.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn3dDel.disabled = true;
+                }
+            }
         }
 
         // --- 2D RENDERING ---
@@ -518,6 +543,18 @@
             else if (el.type === 'fridge') html = `<div class="w-full h-full border-2 border-slate-400/30 rounded-sm bg-gradient-to-br from-slate-200/20 to-slate-400/5 flex flex-col pointer-events-none"><div class="w-full h-1/2 border-b border-slate-400/30"></div></div>`;
             else if (el.type === 'stove') html = `<div class="w-full h-full border border-white/10 rounded-sm bg-slate-800/80 grid grid-cols-2 p-1 gap-1 pointer-events-none"><div class="rounded-full bg-rose-500/40"></div><div class="rounded-full bg-rose-500/40"></div><div class="rounded-full bg-rose-500/40"></div><div class="rounded-full bg-rose-500/40"></div></div>`;
             else if (el.type === 'stairs') html = `<div class="w-full h-full flex flex-col justify-between opacity-80 border-l border-r border-slate-500 pointer-events-none">${Array(8).fill(0).map(()=>`<div class="w-full h-px bg-slate-400/50"></div>`).join('')}</div>`;
+            
+            // New Models 2D Render
+            else if (el.type === 'car') html = `<div class="w-full h-full border border-white/10 rounded-3xl flex items-center justify-center pointer-events-none shadow-lg"><div class="w-1/2 h-2/3 border border-white/20 bg-slate-900/50 rounded-xl backdrop-blur-sm"></div></div>`;
+            else if (el.type === 'lake') html = `<div class="w-full h-full rounded-[40%_60%_70%_30%] bg-blue-400/30 pointer-events-none shadow-inner border-4 border-blue-300/30 backdrop-blur-sm flex items-center justify-center"><i data-lucide="waves" class="w-10 h-10 text-white/40"></i></div>`;
+            else if (el.type === 'house') html = `<div class="w-full h-full border border-slate-700 bg-slate-200/90 pointer-events-none flex flex-col relative overflow-hidden"><div class="w-full h-1/2 bg-slate-800 border-b-2 border-slate-900"></div><i data-lucide="home" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-slate-800"></i></div>`;
+            else if (el.type === 'dome') html = `<div class="w-full h-full rounded-full bg-slate-200 pointer-events-none shadow-[inset_0_-20px_40px_rgba(0,0,0,0.3)] border border-slate-400 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-slate-500"></div></div>`;
+            else if (el.type === 'pool') html = `<div class="w-full h-full border-4 border-slate-200/80 rounded-xl bg-gradient-to-br from-cyan-400/50 to-blue-500/50 pointer-events-none shadow-inner flex items-center justify-center"><div class="w-full h-full opacity-30" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #ffffff 10px, #ffffff 12px);"></div></div>`;
+            else if (el.type === 'bookshelf') html = `<div class="w-full h-full border border-amber-900/50 rounded-sm flex flex-col justify-evenly pointer-events-none bg-gradient-to-r from-black/20 to-transparent"><div class="w-full h-[2px] bg-amber-900/40"></div><div class="w-full h-[2px] bg-amber-900/40"></div></div>`;
+            else if (el.type === 'wardrobe') html = `<div class="w-full h-full border border-white/10 rounded-sm flex pointer-events-none shadow-inner"><div class="w-1/2 h-full border-r border-black/30"></div></div>`;
+            else if (el.type === 'bathtub') html = `<div class="w-full h-full border border-slate-300 rounded-3xl bg-white/10 pointer-events-none p-2 shadow-inner"><div class="w-full h-full border border-slate-300/50 rounded-2xl"></div></div>`;
+            else if (el.type === 'shower') html = `<div class="w-full h-full border-2 border-cyan-200/40 rounded-md bg-cyan-100/10 pointer-events-none grid grid-cols-2 grid-rows-2 backdrop-blur-sm"><div class="border-r border-b border-cyan-200/20"></div></div>`;
+            
             return html;
         }
 
@@ -557,7 +594,15 @@
                 node.style.transform = `rotate(${el.r}deg)`;
                 node.style.transformOrigin = 'center';
                 node.style.cursor = isDragging && isSelected ? 'grabbing' : 'grab';
-                node.style.borderRadius = el.type === 'room' ? '4px' : el.type === 'plant' ? '50%' : '2px';
+                
+                if(el.type === 'room') node.style.borderRadius = '4px';
+                else if (el.type === 'plant' || el.type === 'dome') node.style.borderRadius = '50%';
+                else if (el.type === 'lake') node.style.borderRadius = '40% 60% 70% 30%';
+                else if (el.type === 'car') node.style.borderRadius = '24px';
+                else if (el.type === 'pool') node.style.borderRadius = '12px';
+                else if (el.type === 'bathtub') node.style.borderRadius = '24px';
+                else node.style.borderRadius = '2px';
+
                 node.style.zIndex = (el.layer || 0) * 10 + (isSelected ? 100 : 0);
             });
         }
@@ -672,6 +717,7 @@
                 updateUI();
             }
         });
+        
         document.getElementById('btnMode2D').addEventListener('click', () => { viewMode = '2d'; updateUI(); });
         document.getElementById('btnMode3D').addEventListener('click', () => { 
             viewMode = '3d'; 
@@ -699,6 +745,27 @@
         document.getElementById('btnDeleteElem').addEventListener('click', () => {
             if(selectedId) {
                 const newElements = elements.filter(el => el.id !== selectedId);
+                selectedId = null;
+                pushStateObj(newElements);
+            }
+        });
+
+        // 3D Toolbar Delete
+        document.getElementById('btn3dDelete').addEventListener('click', () => {
+            if(selectedId) {
+                const newElements = elements.filter(el => el.id !== selectedId);
+                if (engine3D && engine3D.tControls) engine3D.tControls.detach();
+                selectedId = null;
+                pushStateObj(newElements);
+            }
+        });
+
+        // Keyboard Delete
+        window.addEventListener('keydown', (e) => {
+            if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                const newElements = elements.filter(el => el.id !== selectedId);
+                if (engine3D && engine3D.tControls) engine3D.tControls.detach();
                 selectedId = null;
                 pushStateObj(newElements);
             }
@@ -995,6 +1062,18 @@
                     if (el.type === 'room') {
                         const floor = new THREE.Mesh(new THREE.PlaneGeometry(el.w, el.h), new THREE.MeshStandardMaterial({ color: el.color, roughness: 0.9, metalness: 0.1 }));
                         floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; group.add(floor);
+                    } else if (el.type === 'house') {
+                        const baseH = el.h * 0.6;
+                        const roofH = el.h * 0.4;
+                        const base = new THREE.Mesh(new THREE.BoxGeometry(el.w, baseH, el.h), standardMat);
+                        base.position.y = baseH / 2; base.castShadow = true; base.receiveShadow = true; group.add(base);
+                        const roofMat = new THREE.MeshStandardMaterial({color: '#64748b'});
+                        const roof = new THREE.Mesh(new THREE.ConeGeometry(Math.max(el.w, el.h) * 0.75, roofH, 4), roofMat);
+                        roof.position.y = baseH + roofH / 2; roof.rotation.y = Math.PI / 4; roof.castShadow = true; group.add(roof);
+                    } else if (el.type === 'dome') {
+                        const domeMat = new THREE.MeshStandardMaterial({color: el.color, roughness: 0.5});
+                        const dome = new THREE.Mesh(new THREE.SphereGeometry(el.w/2, 32, 16, 0, Math.PI*2, 0, Math.PI/2), domeMat);
+                        dome.castShadow = true; dome.receiveShadow = true; group.add(dome);
                     } else if (el.type === 'rug') {
                         const rug = new THREE.Mesh(new THREE.BoxGeometry(el.w, 2, el.h), new THREE.MeshStandardMaterial({ color: el.color, roughness: 1.0 }));
                         rug.position.y = 1; rug.receiveShadow = true; group.add(rug);
@@ -1069,6 +1148,41 @@
                     } else if (el.type === 'toilet') {
                         const base = new THREE.Mesh(new THREE.BoxGeometry(el.w*0.8, 20, el.h*0.7), glossyMat); base.position.set(0, 10, el.h*0.15); base.castShadow = true; group.add(base);
                         const tank = new THREE.Mesh(new THREE.BoxGeometry(el.w, 40, el.h*0.3), glossyMat); tank.position.set(0, 20, -el.h*0.35); tank.castShadow = true; group.add(tank);
+                    } else if (el.type === 'bookshelf') {
+                        const frame = new THREE.Mesh(new THREE.BoxGeometry(el.w, 180, el.h), standardMat); frame.position.y = 90; frame.castShadow = true; group.add(frame);
+                        const inner = new THREE.Mesh(new THREE.BoxGeometry(el.w - 4, 170, el.h + 2), new THREE.MeshStandardMaterial({color: '#1e293b'})); inner.position.set(0, 90, 2); group.add(inner);
+                        for(let i=1; i<=4; i++) { const shelf = new THREE.Mesh(new THREE.BoxGeometry(el.w-4, 2, el.h), standardMat); shelf.position.set(0, 36*i, 0); group.add(shelf); }
+                    } else if (el.type === 'wardrobe') {
+                        const body = new THREE.Mesh(new THREE.BoxGeometry(el.w, 200, el.h), standardMat); body.position.y = 100; body.castShadow = true; group.add(body);
+                        const line = new THREE.Mesh(new THREE.BoxGeometry(1, 190, el.h + 2), new THREE.MeshStandardMaterial({color: '#0f172a'})); line.position.set(0, 100, 1); group.add(line);
+                        const h1 = new THREE.Mesh(new THREE.BoxGeometry(2, 20, 2), glossyMat); h1.position.set(-5, 100, el.h/2 + 1); group.add(h1);
+                        const h2 = new THREE.Mesh(new THREE.BoxGeometry(2, 20, 2), glossyMat); h2.position.set(5, 100, el.h/2 + 1); group.add(h2);
+                    } else if (el.type === 'bathtub') {
+                        const base = new THREE.Mesh(new THREE.BoxGeometry(el.w, 40, el.h), standardMat); base.position.y = 20; base.castShadow = true; group.add(base);
+                        const inner = new THREE.Mesh(new THREE.BoxGeometry(el.w - 10, 35, el.h - 10), new THREE.MeshStandardMaterial({color: '#ffffff'})); inner.position.set(0, 25, 0); group.add(inner);
+                        const tap = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 10), glossyMat); tap.position.set(0, 45, -el.h/2 + 5); group.add(tap);
+                    } else if (el.type === 'shower') {
+                        const base = new THREE.Mesh(new THREE.BoxGeometry(el.w, 5, el.h), standardMat); base.position.y = 2.5; base.receiveShadow = true; group.add(base);
+                        const glassMat = new THREE.MeshPhysicalMaterial({ color: '#ffffff', transmission: 0.9, opacity: 1, transparent: true, roughness: 0.1, ior: 1.5 });
+                        const w1 = new THREE.Mesh(new THREE.BoxGeometry(el.w, 200, 2), glassMat); w1.position.set(0, 100, el.h/2 - 1); group.add(w1);
+                        const w2 = new THREE.Mesh(new THREE.BoxGeometry(2, 200, el.h), glassMat); w2.position.set(el.w/2 - 1, 100, 0); group.add(w2);
+                        const head = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 2), glossyMat); head.position.set(-el.w/2 + 10, 190, -el.h/2 + 10); head.rotation.x = Math.PI/4; head.rotation.z = -Math.PI/4; group.add(head);
+                    } else if (el.type === 'car') {
+                        const base = new THREE.Mesh(new THREE.BoxGeometry(el.w, 20, el.h), standardMat); base.position.y = 15; base.castShadow = true; group.add(base);
+                        const top = new THREE.Mesh(new THREE.BoxGeometry(el.w*0.5, 20, el.h*0.8), glossyMat); top.position.set(-el.w*0.1, 35, 0); top.castShadow = true; group.add(top);
+                        const wheelMat = new THREE.MeshStandardMaterial({color: '#0f172a'});
+                        [[-el.w*0.3, el.h/2], [el.w*0.3, el.h/2], [-el.w*0.3, -el.h/2], [el.w*0.3, -el.h/2]].forEach(pos => {
+                            const wheel = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 4), wheelMat);
+                            wheel.rotation.x = Math.PI/2; wheel.position.set(pos[0], 8, pos[1]); group.add(wheel);
+                        });
+                    } else if (el.type === 'pool') {
+                        const base = new THREE.Mesh(new THREE.BoxGeometry(el.w + 10, 6, el.h + 10), new THREE.MeshStandardMaterial({color: '#e2e8f0'})); base.position.y = 3; base.receiveShadow = true; group.add(base);
+                        const water = new THREE.Mesh(new THREE.BoxGeometry(el.w, 5, el.h), new THREE.MeshPhysicalMaterial({color: '#0ea5e9', transmission: 0.8, opacity: 0.9, transparent: true, roughness: 0.1})); water.position.y = 3.5; group.add(water);
+                    } else if (el.type === 'lake') {
+                        const lakeGeo = new THREE.CylinderGeometry(el.w/2, el.h/2, 5, 32);
+                        const lakeBase = new THREE.Mesh(lakeGeo, new THREE.MeshStandardMaterial({color: '#cbd5e1'})); lakeBase.position.y = 2.5; lakeBase.receiveShadow = true; group.add(lakeBase);
+                        const waterMat = new THREE.MeshPhysicalMaterial({color: '#0ea5e9', transmission: 0.9, opacity: 1, transparent: true, roughness: 0.1});
+                        const lakeWater = new THREE.Mesh(new THREE.CylinderGeometry(el.w/2 - 2, el.h/2 - 2, 4, 32), waterMat); lakeWater.position.y = 3; group.add(lakeWater);
                     } else {
                         const generic = new THREE.Mesh(new THREE.BoxGeometry(el.w, el.h, el.h), standardMat); generic.position.y = el.h/2; generic.castShadow = true; group.add(generic);
                     }
